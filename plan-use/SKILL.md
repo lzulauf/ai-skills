@@ -1,6 +1,6 @@
 ---
 name: plan-use
-description: 'Create and structure execution plans in .plans/ with clear scope, phases, milestones, acceptance criteria, and test delta declarations before writing implementation code.'
+description: 'Create and structure execution plans in ./plans/ with clear scope, phases, milestones, acceptance criteria, and test delta declarations before writing implementation code.'
 argument-hint: 'Describe the initiative or feature you want to plan'
 user-invocable: true
 reusable: true
@@ -30,16 +30,16 @@ Companion skills: plan-implementation for phase-by-phase execution, function-nam
 
 ## Plan Location and Naming
 
-- Store plan files in .plans.
-- Keep active (Drafting, Approved, or Implementing) plans at the .plans root.
-- Archive finished plans under .plans/archive/.
+- Store plan files in ./plans.
+- Keep active (Drafting, Approved, or Implementing) plans at the ./plans root.
+- Archive finished plans under ./plans/archive/.
 - Use concise snake_case names ending in _plan.md when possible.
 - Keep one primary goal per plan.
 - Add cross-links when one plan depends on another.
 
 Examples:
-- .plans/conventions_alignment_plan.md
-- .plans/archive/degree_support.md
+- ./plans/conventions_alignment_plan.md
+- ./plans/archive/degree_support.md
 
 ## Required Plan Sections
 
@@ -74,10 +74,10 @@ Include these sections in order unless there is a strong reason not to:
 	- When a draft is accepted and ready to execute, update status to Approved.
 	- Approved indicates implementation can start without further design edits unless scope changes.
 	- When implementation begins, update status to Implementing as the first implementation step.
-	- When implementation completes successfully, update status to Done and move the plan to .plans/archive/.
-	- If the plan is declined, update status to Rejected and move the plan to .plans/archive/.
-- Active plans in .plans/ should use Drafting, Approved, or Implementing only.
-- Archived plans in .plans/archive/ must use Done or Rejected only.
+	- When implementation completes successfully, update status to Done and move the plan to ./plans/archive/.
+	- If the plan is declined, update status to Rejected and move the plan to ./plans/archive/.
+- Active plans in ./plans/ should use Drafting, Approved, or Implementing only.
+- Archived plans in ./plans/archive/ must use Done or Rejected only.
 - Update status whenever checklist state or plan lifecycle changes.
 - For plans that remain in Drafting, include at least 1-3 concrete draft-improvement suggestions in planning updates.
 
@@ -194,7 +194,7 @@ Checklist style example:
 - Acceptance criteria include test validation evidence expectations (focused and full test runs, or justified exception).
 - Acceptance criteria include documentation validation expectations (updated references/examples or justified exception).
 - Dependencies and prerequisites are linked.
-- Finished plans are moved to .plans/archive/.
+- Finished plans are moved to ./plans/archive/.
 
 ## Update Procedure for Existing Plans
 
@@ -214,7 +214,7 @@ Checklist style example:
 - Before archiving a completed implementation, update the plan's top Status section to Done.
 - If a plan is not being pursued, update status to Rejected before archiving.
 - Add a brief completion note before archiving when useful (for example: completed date and any key follow-up links).
-- Move the plan from .plans/ to .plans/archive/.
+- Move the plan from ./plans/ to ./plans/archive/.
 - Update references from active plans so links point to the archived file path.
 - Keep archived plans as historical records and avoid substantive rewrites after archival.
 - If implementation notes exist, preserve them verbatim as the execution record.

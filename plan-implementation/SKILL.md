@@ -1,7 +1,7 @@
 ---
 name: plan-implementation
 description: 'Execute an existing plan phase-by-phase, updating plan checklists and status in real time, preparing one commit scope per phase, and closing out complete plans.'
-argument-hint: 'Tell me the plan name to start executing, or reference an existing .plans file'
+argument-hint: 'Tell me the plan name to start executing, or reference an existing ./plans file'
 user-invocable: true
 reusable: true
 ---
@@ -30,7 +30,7 @@ Companion skills: plan-use for plan authoring/re-scoping, test-writing for requi
 
 Before coding any phase:
 
-1. Open the plan file in `.plans/` and verify required sections exist.
+1. Open the plan file in `./plans/` and verify required sections exist.
 2. Confirm `Status` is set to `Approved` or `Implementing`.
 3. If status is `Approved`, update it to `Implementing` as the first execution step before code changes.
 4. Confirm the target phase has explicit deliverables and acceptance checks.
@@ -86,11 +86,11 @@ Repeat this loop for each phase, in order:
 - When all acceptance criteria are met:
   - set `Status: Done`,
   - add a final implementation note summarizing closure,
-  - move the plan to `.plans/archive/`.
+  - move the plan to `./plans/archive/`.
 - If the effort is halted permanently:
   - set `Status: Rejected`,
   - record why in implementation notes,
-  - move to `.plans/archive/`.
+  - move to `./plans/archive/`.
 
 ## Implementation Notes Format
 

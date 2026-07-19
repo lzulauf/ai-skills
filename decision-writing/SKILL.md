@@ -131,7 +131,7 @@ Use a standard comparison for routine decisions and require deeper analysis for 
 - Recommend a specific approach and, when applicable, specific technology choices.
 - Explain why alternatives were not chosen.
 - State confidence level (high/medium/low) and key uncertainties.
-- If conviction is strong enough and scope is implementation-ready, create a plan in .plans/ and link it.
+- If conviction is strong enough and scope is implementation-ready, create a plan in ./plans/ and link it.
 
 ## Plan Coupling Rules
 

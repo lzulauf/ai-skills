@@ -1,6 +1,6 @@
 ---
 name: next-work-selection
-description: 'Prioritize and select the next plan to work on from .plans/ by ranking active plans by status, dependencies, remaining checklist items, and planning hygiene tasks.'
+description: 'Prioritize and select the next plan to work on from ./plans/ by ranking active plans by status, dependencies, remaining checklist items, and planning hygiene tasks.'
 argument-hint: 'Describe the current state of your plans or ask for a recommendation'
 user-invocable: true
 reusable: true
@@ -8,14 +8,14 @@ reusable: true
 
 # Next Work Selection
 
-Use this skill to choose the best next implementation target from .plans.
+Use this skill to choose the best next implementation target from ./plans.
 
 Companion skills: plan-use for plan authoring/re-scoping, plan-implementation for in-flight status/checklist updates, and decision-writing when dependency order is blocked by unresolved approach choices.
 
 ## When To Use
 
 - User asks "what's next" or "what should we do next"
-- User asks to prioritize or rank plans in .plans
+- User asks to prioritize or rank plans in ./plans
 - User asks for execution order across multiple active plans
 - User asks which plan to start first after recent completions
 
@@ -28,7 +28,7 @@ Companion skills: plan-use for plan authoring/re-scoping, plan-implementation fo
 ## Required Workflow
 
 1. Gather active plan state
-- Inspect all root .plans/*.md files.
+- Inspect all root ./plans/*.md files.
 - Read each plan's Status section.
 - Count open and completed checklist items.
 
@@ -40,7 +40,7 @@ Companion skills: plan-use for plan authoring/re-scoping, plan-implementation fo
 - Respect dependency order from cross-plan references and execution-order sections.
 
 3. Identify blocking and hygiene work
-- Flag completed plans that still live in root .plans and recommend archiving.
+- Flag completed plans that still live in root ./plans and recommend archiving.
 - Flag status drift where a plan is Drafting but substantial implementation already landed.
 - Flag unresolved dependency gates before recommending downstream work.
 
@@ -67,7 +67,7 @@ Companion skills: plan-use for plan authoring/re-scoping, plan-implementation fo
 
 ## Review Checklist
 
-- Root .plans status was inspected before ranking.
+- Root ./plans status was inspected before ranking.
 - Dependency and execution-order notes were considered.
 - Recommendation includes rationale, not just file ordering.
 - Completed-plan archiving hygiene is addressed when needed.
