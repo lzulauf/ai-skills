@@ -25,6 +25,18 @@ Follow the repository's commit attribution and worktree-location invariants. Com
 
 ## Creating Commits
 
+Ask for permission before committing unless committing is already authorized. Authorization is standing, not per-commit: once the user grants it — in the current session or through a durable project/user instruction — stage and commit as needed without asking again for each individual commit. Pushing or otherwise publishing commits to a remote always requires an explicit request. Every safeguard in this document still applies.
+
+Whenever you create one or more commits, state clearly in your response that you committed and what each commit contained.
+
+Construct commits so that:
+
+- Each commit is a single logical change, distinct from the others.
+- Commits are ordered so each follows logically from the previous one.
+- The repository is left in a good state at every commit — it builds and its tests could be run between any two commits (build-safe ordering).
+
+Detailed grouping and ordering of a working set is planned by `everlaw-commit-planner`; these invariants hold regardless of who plans the commits.
+
 1. Inspect the status and relevant staged and unstaged diffs.
 2. Stage only the changes intended for the commit.
 3. Write the message around the resulting behavior:
