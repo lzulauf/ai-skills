@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Workflow"
+  short_description: "Preserve human attribution and worktree locations"
+  default_prompt: "Use $git-workflow to create commits or manage Git worktrees safely."
