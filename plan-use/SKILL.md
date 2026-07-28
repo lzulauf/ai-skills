@@ -98,12 +98,21 @@ Include these sections in order unless there is a strong reason not to:
 
 - For non-trivial behavior changes, include light pseudocode representations of core algorithms.
 - For new apis, include sample calling code that demonstrates usage.
+- For changes that transform a declared input into a generated or derived artifact (code generation, templates/scaffolding, schema-to-file, migrations, serialization), include a worked example: one representative real input and the resulting output artifact(s), shown as before/after diffs. Prefer an existing entity from the codebase over an invented one.
 
 ### Diagram requirements
 
 - For non-trivial class relationships, calling sequences, etc. include diagrams that visually represent the logic or relationships.
 - Mermaid diagrams and/or ascii art can be used as appropriate.
 - Keep diagrams small and focused; brevity and broad understanding are more important than showing every possible detail.
+
+### Worked example requirements
+
+- When a plan introduces or changes an input->output transformation, include a "Worked example" showing the end-to-end result on one concrete case, not just the mechanism.
+- Show every artifact the change touches for that case (the edited source, each generated file, and any file the generation removes/rewrites).
+- Use a real, named entity from the repo so reviewers can diff against what exists today.
+- Call out anything the example reveals that the prose didn't (ordering, escaping, comment/metadata flow, idempotency).
+- Keep it to a single representative case; add a second only when it exercises a materially different path (for example multi-entry vs. single-entry).
 
 ## Testing Approach Section Rules
 
@@ -180,6 +189,8 @@ Checklist style example:
 - Technical design details include implementation pseudocode for non-trivial logic.
 - Technical design details include usage pseudocode that demonstrates intended capabilities.
 - Technical design details include Mermaid/ASCII diagrams when they materially improve clarity, or a rationale for omission.
+- Plans that generate or derive files include a concrete worked example (real input + resulting artifacts as before/after), or a rationale for omission.
+- The worked example covers every artifact the change touches for that case, including removals.
 - Testing approach section is explicit and actionable.
 - Testing approach explicitly states expected test delta classification.
 - Any "no test delta" claim includes rationale and is consistent with the planned code changes.
