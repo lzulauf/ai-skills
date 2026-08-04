@@ -1,6 +1,6 @@
 ---
 name: python-init-files
-description: 'Keep __init__.py files empty by default. Import directly from defining modules, not via package-level re-exports. Only add convenience exports for public library packages intended for external consumers.'
+description: 'Keep __init__.py files empty by default. Import directly from defining modules, not via package-level re-exports. Follow the codebase import convention, defaulting new codebases to absolute imports over relative. Only add convenience exports for public library packages intended for external consumers.'
 argument-hint: 'Describe the package or __init__.py you want to review'
 user-invocable: true
 reusable: true
@@ -34,6 +34,24 @@ from mypackage import Facility, fetch_facilities
 
 This keeps the import graph flat, explicit, and easy to trace. It avoids circular imports, lazy-loading surprises, and makes `grep`-based discovery reliable.
 
+### Absolute imports over relative
+
+Match the import style the codebase already uses. When contributing to an existing project, follow its established convention consistently.
+
+For new codebases, default to absolute imports rooted at the top-level package rather than relative imports:
+
+```python
+# Good — absolute, rooted at the package
+from mypackage.models import Facility
+from mypackage.api.client import fetch_facilities
+
+# Not — relative
+from .models import Facility
+from ..api.client import fetch_facilities
+```
+
+Absolute imports read the same regardless of the importing module's location, survive file moves and renames without churn, and make `grep`-based discovery reliable. Reserve relative imports for codebases whose existing convention already uses them.
+
 ### Exception: public library packages
 
 If a package is explicitly designed as a library for external developers (published on PyPI, consumed by other projects), add curated convenience exports in `__init__.py`:
@@ -61,6 +79,7 @@ Do not add imports to `__init__.py` just so internal callers can type less. Inte
 
 ## Checklist
 
+- [ ] Do imports match the codebase convention (absolute by default for new codebases)?
 - [ ] Is `__init__.py` empty? If yes, done.
 - [ ] If non-empty: is this a public library package with external consumers?
 - [ ] If yes: are exports curated and documented in `__all__`?
