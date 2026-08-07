@@ -1,6 +1,6 @@
 ---
 name: next-work-selection
-description: 'Prioritize and select the next plan to work on from ./plans/ by ranking active plans by status, dependencies, remaining checklist items, and planning hygiene tasks.'
+description: 'Prioritize and select the next plan to work on from the global $PLANS_ROOT tree (default ~/code/plans) by ranking active plans across repos by status, dependencies, remaining checklist items, and planning hygiene tasks.'
 argument-hint: 'Describe the current state of your plans or ask for a recommendation'
 user-invocable: true
 reusable: true
@@ -8,14 +8,14 @@ reusable: true
 
 # Next Work Selection
 
-Use this skill to choose the best next implementation target from ./plans.
+Use this skill to choose the best next implementation target from the global `$PLANS_ROOT` tree (default `$HOME/code/plans`, i.e. `/workspace/plans` in the dev container). Plans across all repos share this tree; each plan's `Context` section names its target repo.
 
 Companion skills: plan-use for plan authoring/re-scoping, plan-implementation for in-flight status/checklist updates, and decision-writing when dependency order is blocked by unresolved approach choices.
 
 ## When To Use
 
 - User asks "what's next" or "what should we do next"
-- User asks to prioritize or rank plans in ./plans
+- User asks to prioritize or rank plans in `$PLANS_ROOT`
 - User asks for execution order across multiple active plans
 - User asks which plan to start first after recent completions
 
@@ -28,8 +28,9 @@ Companion skills: plan-use for plan authoring/re-scoping, plan-implementation fo
 ## Required Workflow
 
 1. Gather active plan state
-- Inspect all root ./plans/*.md files.
-- Read each plan's Status section.
+- Inspect all root `$PLANS_ROOT/*.md` files.
+- Read each plan's Status and Context sections.
+- Group candidates by `Context.Repo`. If the user asks about a specific repo (or the current client is set), scope to that repo but still surface high-priority cross-repo items.
 - Count open and completed checklist items.
 
 2. Apply prioritization gates
@@ -40,7 +41,8 @@ Companion skills: plan-use for plan authoring/re-scoping, plan-implementation fo
 - Respect dependency order from cross-plan references and execution-order sections.
 
 3. Identify blocking and hygiene work
-- Flag completed plans that still live in root ./plans and recommend archiving.
+- Flag completed plans that still live in the `$PLANS_ROOT` root and recommend archiving.
+- Flag plans missing a `Context` section or an accurate `Repo`, and plans still living in legacy per-repo locations (`<repo>/plans`, `<repo>/.plans`, `.claude/plans`) that should migrate to `$PLANS_ROOT`.
 - Flag status drift where a plan is Drafting but substantial implementation already landed.
 - Flag unresolved dependency gates before recommending downstream work.
 
@@ -67,7 +69,7 @@ Companion skills: plan-use for plan authoring/re-scoping, plan-implementation fo
 
 ## Review Checklist
 
-- Root ./plans status was inspected before ranking.
+- Root `$PLANS_ROOT` status was inspected (across repos) before ranking.
 - Dependency and execution-order notes were considered.
 - Recommendation includes rationale, not just file ordering.
 - Completed-plan archiving hygiene is addressed when needed.

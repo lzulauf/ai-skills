@@ -1,7 +1,7 @@
 ---
 name: plan-implementation
 description: 'Execute an existing plan phase-by-phase, updating plan checklists and status in real time, preparing one commit scope per phase, and closing out complete plans.'
-argument-hint: 'Tell me the plan name to start executing, or reference an existing ./plans file'
+argument-hint: 'Tell me the plan name to start executing, or reference an existing $PLANS_ROOT file'
 user-invocable: true
 reusable: true
 ---
@@ -10,7 +10,7 @@ reusable: true
 
 Use this skill to execute an existing plan in controlled, reviewable increments.
 
-Companion skills: plan-use for plan authoring/re-scoping, test-writing for required test deltas, test-running for validation, readme-writing for docs updates, and commit-message-writing for commit message quality.
+Companion skills: plan-use for plan authoring/re-scoping, git-workflow for resolving/creating the plan's target worktree, test-writing for required test deltas, test-running for validation, readme-writing for docs updates, and commit-message-writing for commit message quality.
 
 ## When To Use
 
@@ -30,12 +30,26 @@ Companion skills: plan-use for plan authoring/re-scoping, test-writing for requi
 
 Before coding any phase:
 
-1. Open the plan file in `./plans/` and verify required sections exist.
-2. Confirm `Status` is set to `Approved` or `Implementing`.
-3. If status is `Approved`, update it to `Implementing` as the first execution step before code changes.
-4. Confirm the target phase has explicit deliverables and acceptance checks.
-5. Confirm test/docs expectations for the phase are explicit.
-6. If these are missing or stale, update the plan with `plan-use` first.
+1. Open the plan file in `$PLANS_ROOT` (default `$HOME/code/plans`, i.e. `/workspace/plans` in the dev container) and verify required sections exist.
+2. Read the plan's `Context` section and resolve the target workspace (see "Resolving the Target Worktree" below) before touching any code.
+3. Confirm `Status` is set to `Approved` or `Implementing`.
+4. If status is `Approved`, update it to `Implementing` as the first execution step before code changes.
+5. Confirm the target phase has explicit deliverables and acceptance checks.
+6. Confirm test/docs expectations for the phase are explicit.
+7. If these are missing or stale, update the plan with `plan-use` first.
+
+## Resolving the Target Worktree
+
+The plan lives outside the repo, so the first execution act is to land in the
+right checkout named by the plan's `Context` section. Use `git-workflow`.
+
+1. Read `Repo`, `Worktree`, and `Branch` from Context.
+2. If `Worktree` is `main` (or the repo has no separate worktree for this work), operate in the primary checkout `~/code/<repo>`.
+3. Otherwise ensure the worktree at `$WORKTREE_ROOT/<repo>/<worktree>` exists:
+	- If it exists, switch to it (`worktree <name>` for `<repo>`).
+	- If it does not, create it on `Branch` via git-workflow (`worktree --add <name> [branch]`), then switch.
+4. If `Worktree`/`Branch` are `TBD`, decide them now with the user, create the worktree via git-workflow, and write the resolved values back into the plan's Context before coding.
+5. Confirm the working directory is the resolved worktree before implementing any phase.
 
 ## Phase-By-Phase Execution Loop
 
@@ -86,11 +100,11 @@ Repeat this loop for each phase, in order:
 - When all acceptance criteria are met:
   - set `Status: Done`,
   - add a final implementation note summarizing closure,
-  - move the plan to `./plans/archive/`.
+  - move the plan to `$PLANS_ROOT/archive/`.
 - If the effort is halted permanently:
   - set `Status: Rejected`,
   - record why in implementation notes,
-  - move to `./plans/archive/`.
+  - move to `$PLANS_ROOT/archive/`.
 
 ## Implementation Notes Format
 
@@ -121,7 +135,8 @@ Rules:
 
 ## Review Checklist
 
-- Correct plan file selected and status is `Implementing`.
+- Correct plan file selected from `$PLANS_ROOT` and status is `Implementing`.
+- Target worktree resolved from Context (created via git-workflow if missing) and is the active working directory.
 - Current phase scope is explicit and bounded.
 - Current phase checklist outcomes are complete before moving on.
 - Test/docs requirements for the phase were executed.

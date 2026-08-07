@@ -1,6 +1,6 @@
 ---
 name: plan-use
-description: 'Create and structure execution plans in ./plans/ with clear scope, phases, milestones, acceptance criteria, and test delta declarations before writing implementation code.'
+description: 'Create and structure execution plans in the global $PLANS_ROOT tree (default ~/code/plans) with clear scope, phases, milestones, acceptance criteria, target repo/worktree context, and test delta declarations before writing implementation code.'
 argument-hint: 'Describe the initiative or feature you want to plan'
 user-invocable: true
 reusable: true
@@ -10,7 +10,7 @@ reusable: true
 
 Use this skill to draft clear, execution-ready planning documents and keep them structurally accurate as scope evolves.
 
-Companion skills: plan-implementation for phase-by-phase execution, function-naming for naming standards, immutable-types for immutable-model constraints, decision-writing for approach-selection docs, and readme-writing for README/docs ownership and update flow.
+Companion skills: plan-implementation for phase-by-phase execution, git-workflow for the worktree a plan targets, function-naming for naming standards, immutable-types for immutable-model constraints, decision-writing for approach-selection docs, and readme-writing for README/docs ownership and update flow.
 
 ## When To Use
 
@@ -30,35 +30,47 @@ Companion skills: plan-implementation for phase-by-phase execution, function-nam
 
 ## Plan Location and Naming
 
-- Store plan files in ./plans.
-- Keep active (Drafting, Approved, or Implementing) plans at the ./plans root.
-- Archive finished plans under ./plans/archive/.
-- Use concise snake_case names ending in _plan.md when possible.
+Plans live in a single global tree, **outside** any repo, so all in-flight work
+across every checkout is visible in one place. Each plan records the repo and
+worktree it targets in its own Context section (see below) rather than living
+inside that repo.
+
+- Store plan files in `$PLANS_ROOT` (default `$HOME/code/plans`, which is
+  `/workspace/plans` inside the dev container — the same directory through two
+  mounts). If `$PLANS_ROOT` is unset, use that default path.
+- Keep active (Drafting, Approved, or Implementing) plans at the `$PLANS_ROOT` root.
+- Archive finished plans under `$PLANS_ROOT/archive/`.
+- Because the tree is flat and shared across repos, prefix each filename with the
+  target repo (client) name to keep names unique and greppable: `<repo>_<name>_plan.md`.
+- Use concise snake_case names ending in `_plan.md` when possible.
 - Keep one primary goal per plan.
-- Add cross-links when one plan depends on another.
+- Do not create per-repo `plans/`, `.plans/`, or `.claude/plans/` directories; those are legacy locations.
+- Add cross-links when one plan depends on another (relative paths within `$PLANS_ROOT`).
 
 Examples:
-- ./plans/conventions_alignment_plan.md
-- ./plans/archive/degree_support.md
+- `$PLANS_ROOT/servers_conventions_alignment_plan.md`
+- `$PLANS_ROOT/nextrec_coverage_gap_plan.md`
+- `$PLANS_ROOT/archive/servers_degree_support_plan.md`
 
 ## Required Plan Sections
 
 Include these sections in order unless there is a strong reason not to:
 
 1. Status
-2. Goal
-3. Why this comes first (optional but recommended)
-4. Scope
-5. Out of scope
-6. Technical design details
-7. Testing approach
-8. Documentation approach
-9. Progress checklist
-10. Phases (numbered, with concrete deliverables)
-11. Execution order recommendation
-12. Implementation notes (append-only log; may be initialized empty during drafting)
-13. Risks and mitigations (optional)
-14. Acceptance criteria
+2. Context (target repo/worktree/branch)
+3. Goal
+4. Why this comes first (optional but recommended)
+5. Scope
+6. Out of scope
+7. Technical design details
+8. Testing approach
+9. Documentation approach
+10. Progress checklist
+11. Phases (numbered, with concrete deliverables)
+12. Execution order recommendation
+13. Implementation notes (append-only log; may be initialized empty during drafting)
+14. Risks and mitigations (optional)
+15. Acceptance criteria
 
 ## Status Section Rules
 
@@ -74,12 +86,37 @@ Include these sections in order unless there is a strong reason not to:
 	- When a draft is accepted and ready to execute, update status to Approved.
 	- Approved indicates implementation can start without further design edits unless scope changes.
 	- When implementation begins, update status to Implementing as the first implementation step.
-	- When implementation completes successfully, update status to Done and move the plan to ./plans/archive/.
-	- If the plan is declined, update status to Rejected and move the plan to ./plans/archive/.
-- Active plans in ./plans/ should use Drafting, Approved, or Implementing only.
-- Archived plans in ./plans/archive/ must use Done or Rejected only.
+	- When implementation completes successfully, update status to Done and move the plan to `$PLANS_ROOT/archive/`.
+	- If the plan is declined, update status to Rejected and move the plan to `$PLANS_ROOT/archive/`.
+- Active plans in `$PLANS_ROOT` should use Drafting, Approved, or Implementing only.
+- Archived plans in `$PLANS_ROOT/archive/` must use Done or Rejected only.
 - Update status whenever checklist state or plan lifecycle changes.
 - For plans that remain in Drafting, include at least 1-3 concrete draft-improvement suggestions in planning updates.
+
+## Context Section Rules
+
+Because plans now live outside the repos, every plan must state where its work
+lands. Include a `Context` section immediately after `Status` and before `Goal`.
+
+- Fields:
+	- `Repo:` (required) — the target client/repo checkout name under `~/code/<repo>` (for example `servers`, `nextrec`, `utilities`). This is also the filename prefix.
+	- `Worktree:` (include by default) — the worktree name under `$WORKTREE_ROOT/<repo>/<name>`, or `main` for the primary checkout. Omit only when the target worktree is genuinely undecided, and say so explicitly (for example `- Worktree: TBD (decide at implementation)`).
+	- `Branch:` (include by default) — the git branch the worktree uses. Same TBD rule as Worktree.
+- Keep `Repo` accurate at all times; it is how next-work-selection groups cross-repo plans and how plan-implementation finds the checkout.
+- The `Worktree`/`Branch` pair links the plan to the shared worktree tree owned by git-workflow. When implementation starts, plan-implementation resolves or creates this worktree via git-workflow before coding.
+- If a plan targets more than one repo, keep one primary `Repo` for the filename prefix and list the others as `Also touches:` lines in Context, with a note on ordering.
+
+Example:
+
+```md
+## Status
+Approved
+
+## Context
+- Repo: servers
+- Worktree: ai-sandbox-docker-broker
+- Branch: luke/ai-sandbox-docker-broker
+```
 
 ## Technical Design Details Rules
 
@@ -176,10 +213,12 @@ Checklist style example:
 - If a conventions or migration prerequisite exists, state it near the top as Prerequisite.
 - Link dependent plans directly.
 - Do not start downstream feature phases until prerequisite checklist gates are met.
-- If a plan depends on unresolved approach choices, create a decision document in decisions/ as a Markdown file and link it from the plan.
+- If a plan depends on unresolved approach choices, create a decision document in `$PLANS_ROOT/decisions/` as a Markdown file (repo-prefixed like plans) and link it from the plan.
 
 ## Plan Review Checklist
 
+- Plan lives in `$PLANS_ROOT` (not inside a repo) and is filename-prefixed with its target repo.
+- Context section exists (immediately after Status) with an accurate `Repo`, and `Worktree`/`Branch` set or explicitly marked TBD.
 - Status section exists at the top and reflects current lifecycle state.
 - Status value is one of: Drafting, Approved, Implementing, Done, Rejected.
 - Archived plans explicitly show Done or Rejected status.
@@ -205,7 +244,7 @@ Checklist style example:
 - Acceptance criteria include test validation evidence expectations (focused and full test runs, or justified exception).
 - Acceptance criteria include documentation validation expectations (updated references/examples or justified exception).
 - Dependencies and prerequisites are linked.
-- Finished plans are moved to ./plans/archive/.
+- Finished plans are moved to `$PLANS_ROOT/archive/`.
 
 ## Update Procedure for Existing Plans
 
@@ -225,7 +264,7 @@ Checklist style example:
 - Before archiving a completed implementation, update the plan's top Status section to Done.
 - If a plan is not being pursued, update status to Rejected before archiving.
 - Add a brief completion note before archiving when useful (for example: completed date and any key follow-up links).
-- Move the plan from ./plans/ to ./plans/archive/.
+- Move the plan from `$PLANS_ROOT` to `$PLANS_ROOT/archive/` (keeping the repo-prefixed filename).
 - Update references from active plans so links point to the archived file path.
 - Keep archived plans as historical records and avoid substantive rewrites after archival.
 - If implementation notes exist, preserve them verbatim as the execution record.

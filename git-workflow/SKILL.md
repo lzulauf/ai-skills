@@ -63,6 +63,8 @@ $WORKTREE_ROOT/<repo>/<name>        # default WORKTREE_ROOT=~/code/worktrees
 
 `<repo>` is the primary checkout's directory name (e.g. `servers`), and `<name>` is the worktree's short name; preserve slashes in the name as nested directories. The sentinel name `main` denotes the primary checkout itself, not a directory on disk. Never place a worktree inside the primary checkout, and never fall back to an agent-specific or system-temporary location (e.g. `.claude/worktrees/`).
 
+Planning documents live in a separate global tree, `$PLANS_ROOT` (default `~/code/plans`), a sibling of both the checkouts and the worktree tree — never inside a worktree. A plan names its target `<repo>` and worktree `<name>` in its Context section; `plan-implementation` resolves or creates that worktree here (via the commands below) before coding. Treat the plan's Context as the source of truth for which `(repo, name)` a piece of work belongs to.
+
 ### Prefer the `worktree` command
 
 The shell environment provides a `worktree` command (alias `wt`) that owns this location convention and switches the active `(client, worktree)` context. When it is available in the shell, use it as the canonical entrypoint:
