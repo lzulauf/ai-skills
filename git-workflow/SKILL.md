@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Safely create, amend, rebase, cherry-pick, or otherwise produce Git commits and create, inspect, or remove Git worktrees. Use whenever an agent is asked to commit changes, prepare commits, manage branches through worktrees, create a workspace for a branch, or clean up a worktree. Preserves the human's configured Git identity, prohibits Git configuration changes and agent attribution, and keeps worktrees under the primary checkout's worktrees directory.
+description: Safely create, amend, rebase, cherry-pick, or otherwise produce Git commits and create, inspect, or remove Git worktrees. Use whenever an agent is asked to commit changes, prepare commits, manage branches through worktrees, create a workspace for a branch, or clean up a worktree. Preserves the human's configured Git identity, prohibits Git configuration changes and agent attribution, and keeps worktrees in the shared `~/code/worktrees/<repo>/` tree via the `worktree` command.
 ---
 
 # Git Workflow
@@ -55,38 +55,54 @@ Apply the same safeguards to amend, rebase, cherry-pick, merge, and revert opera
 
 ## Managing Worktrees
 
-Treat "workspace" as a Git worktree. Locate the primary checkout using the first `worktree` entry from:
+Treat "workspace" as a Git worktree. Worktrees live in a shared tree keyed by repo and name, **outside** the primary checkout:
+
+```text
+$WORKTREE_ROOT/<repo>/<name>        # default WORKTREE_ROOT=~/code/worktrees
+```
+
+`<repo>` is the primary checkout's directory name (e.g. `servers`), and `<name>` is the worktree's short name; preserve slashes in the name as nested directories. The sentinel name `main` denotes the primary checkout itself, not a directory on disk. Never place a worktree inside the primary checkout, and never fall back to an agent-specific or system-temporary location (e.g. `.claude/worktrees/`).
+
+### Prefer the `worktree` command
+
+The shell environment provides a `worktree` command (alias `wt`) that owns this location convention and switches the active `(client, worktree)` context. When it is available in the shell, use it as the canonical entrypoint:
+
+```bash
+worktree                          # list worktrees for the current repo (also -l/--list)
+worktree <name>                   # switch to an existing worktree (errors if missing)
+worktree --add <name> [branch]    # create at $WORKTREE_ROOT/<repo>/<name>, then switch
+worktree --main                   # switch back to the primary checkout (also `-`, `main`)
+worktree --rm <name>              # remove a worktree via `git worktree remove`
+```
+
+`worktree --add` runs `git -C <primary> worktree add "$WORKTREE_ROOT/<repo>/<name>" [branch]` under the hood, so it always lands in the known location. Creation is explicit: a bare `worktree <name>` only switches, and errors if the worktree is missing.
+
+### Driving Git directly
+
+When the `worktree` function is not sourced (non-interactive shell), or you need to operate on a worktree by absolute path without switching the session's context, run the equivalent Git commands against the same location. Locate the primary checkout from the first `worktree` entry of:
 
 ```bash
 git worktree list --porcelain
 ```
 
-Place every added worktree at:
-
-```text
-<primary-checkout>/worktrees/<branch>
-```
-
-Preserve slashes in branch names as nested directories. Always pass `--relative-paths` so the linkage files between the primary checkout and the worktree are relative, keeping the worktree resolvable when the repository is reached through different mount points (e.g. a VM path versus the host path). This requires git ≥ 2.48; if `git worktree add --relative-paths -h` does not list the flag, omit it and proceed with absolute paths. `--relative-paths` changes no config — the repo-local `extensions.relativeWorktrees` marker it relies on is set automatically and is not a `git config` mutation you perform.
-
-For an existing branch:
+Create the worktree at `$WORKTREE_ROOT/<repo>/<name>`, making the parent directory first:
 
 ```bash
-git worktree add --relative-paths "<primary-checkout>/worktrees/<branch>" "<branch>"
+mkdir -p "$WORKTREE_ROOT/<repo>"
+# existing branch:
+git -C <primary> worktree add "$WORKTREE_ROOT/<repo>/<name>" "<branch>"
+# new branch off a base:
+git -C <primary> worktree add -b "<branch>" "$WORKTREE_ROOT/<repo>/<name>" "<base>"
 ```
 
-For a new branch:
+Because both the primary checkout (`~/code/<repo>`) and the worktree tree (`~/code/worktrees/<repo>/`) live under `~/code`, the linkage resolves when the repository is reached through different mount points (e.g. a VM path versus the host path). On git ≥ 2.48 you may add `--relative-paths` to keep the linkage files relative; omit it on older git. `--relative-paths` changes no config — the repo-local `extensions.relativeWorktrees` marker it relies on is set automatically and is not a `git config` mutation you perform.
+
+Before adding a worktree, confirm that the branch is not already checked out and the destination does not contain unrelated files.
+
+Remove worktrees through Git (or `worktree --rm`); do not manually delete a registered worktree:
 
 ```bash
-git worktree add --relative-paths -b "<branch>" "<primary-checkout>/worktrees/<branch>" "<base>"
+git -C <primary> worktree remove "$WORKTREE_ROOT/<repo>/<name>"
 ```
 
-Before adding a worktree, confirm that the branch is not already checked out and the destination does not contain unrelated files. Do not use an agent-specific or system-temporary location as a fallback.
-
-Remove worktrees through Git:
-
-```bash
-git worktree remove "<primary-checkout>/worktrees/<branch>"
-```
-
-Do not manually delete a registered worktree. Do not use `--force` unless the user explicitly authorizes discarding the worktree's changes.
+Do not use `--force` unless the user explicitly authorizes discarding the worktree's changes.
